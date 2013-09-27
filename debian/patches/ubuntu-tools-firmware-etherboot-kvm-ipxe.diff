@@ -1,0 +1,37 @@
+Description: Use etherboot images from kvm-ipxe
+ Since we do not seem to package qemu-ipxe (as Debian does) we
+ used to build depend on ipxe. But kvm-ipxe seems to be closer
+ to what Debian does as it only contains a small subset of all
+ the rom files. And Xen uses only two of them.
+ This patch changes the Xen code to look for the filenames
+ that kvm-ipxe uses.
+Forwarded: not-needed
+Origin: vendor, created on merge
+Author: Stefan Bader <stefan.bader@canonical.com>
+
+Index: xen-4.3.0/Config.mk
+===================================================================
+--- xen-4.3.0.orig/Config.mk	2013-07-09 17:47:54.252867040 +0200
++++ xen-4.3.0/Config.mk	2013-07-09 17:48:28.585034881 +0200
+@@ -217,7 +217,7 @@ SEABIOS_UPSTREAM_TAG ?= 3a28511b46f0c2af
+ # Wed Jun 26 16:30:45 2013 +0100
+ # xen: Don't perform SMP setup.
+ 
+-ETHERBOOT_NICS ?= rtl8139 e1000_82540
++ETHERBOOT_NICS ?= rtl8139 e1000
+ 
+ # Specify which qemu-dm to use. This may be `ioemu' to use the old
+ # Mercurial in-tree version, or a local directory, or a git URL.
+Index: xen-4.3.0/tools/firmware/hvmloader/Makefile
+===================================================================
+--- xen-4.3.0.orig/tools/firmware/hvmloader/Makefile	2013-07-09 17:48:19.928992571 +0200
++++ xen-4.3.0/tools/firmware/hvmloader/Makefile	2013-07-09 17:48:28.585034881 +0200
+@@ -48,7 +48,7 @@ CIRRUSVGA_ROM := ../vgabios/VGABIOS-lgpl
+ else
+ CIRRUSVGA_ROM := ../vgabios/VGABIOS-lgpl-latest.cirrus.bin
+ endif
+-ETHERBOOT_ROMS := $(addprefix /usr/lib/ipxe/, $(addsuffix .rom, $(ETHERBOOT_NICS)))
++ETHERBOOT_ROMS := $(addprefix /usr/share/qemu/pxe-, $(addsuffix .rom, $(ETHERBOOT_NICS)))
+ endif
+ 
+ ROMS := 

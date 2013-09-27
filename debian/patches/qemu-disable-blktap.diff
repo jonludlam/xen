@@ -1,0 +1,93 @@
+qemu: Disable blktap build
+
+There is no upstream version of this (only Citrix has something which
+is not going to be upstream for XenServer).
+Index: xen-4.2.0/qemu/Makefile
+===================================================================
+--- xen-4.2.0.orig/qemu/Makefile	2012-11-07 17:30:41.000000000 +0100
++++ xen-4.2.0/qemu/Makefile	2012-11-13 10:26:05.117688389 +0100
+@@ -47,13 +47,9 @@
+ recurse-all: $(SUBDIR_RULES)
+ 
+ CPPFLAGS += -I$(XEN_ROOT)/tools/libxc
+-CPPFLAGS += -I$(XEN_ROOT)/tools/blktap/lib
+ CPPFLAGS += -I$(XEN_ROOT)/tools/xenstore
+ CPPFLAGS += -I$(XEN_ROOT)/tools/include
+ 
+-tapdisk-ioemu: tapdisk-ioemu.c cutils.c block.c block-raw.c block-cow.c block-qcow.c aes.c block-vmdk.c block-cloop.c block-dmg.c block-bochs.c block-vpc.c block-vvfat.c block-qcow2.c hw/xen_blktap.c osdep.c
+-	$(CC) -DQEMU_TOOL $(CFLAGS) $(CPPFLAGS) $(BASE_CFLAGS) $(LDFLAGS) $(BASE_LDFLAGS) -o $@ $^ -lz $(LIBS)
+-
+ #######################################################################
+ # BLOCK_OBJS is code used by both qemu system emulation and qemu-img
+ 
+Index: xen-4.2.0/qemu/configure
+===================================================================
+--- xen-4.2.0.orig/qemu/configure	2012-11-07 17:30:40.000000000 +0100
++++ xen-4.2.0/qemu/configure	2012-11-13 10:28:39.378442525 +0100
+@@ -185,9 +185,10 @@
+ kvm="yes"
+ kerneldir=""
+ aix="no"
+-blobs="yes"
++blobs="no"
+ fdt="yes"
+ sdl_x11="no"
++brlapi="no"
+ 
+ # OS specific
+ if check_define __linux__ ; then
+Index: xen-4.2.0/qemu/hw/xen_machine_pv.c
+===================================================================
+--- xen-4.2.0.orig/qemu/hw/xen_machine_pv.c	2012-11-07 17:30:40.000000000 +0100
++++ xen-4.2.0/qemu/hw/xen_machine_pv.c	2012-11-13 10:26:48.685901388 +0100
+@@ -29,10 +29,6 @@
+ #include "xen_backend.h"
+ #include "qemu-xen.h"
+ 
+-#ifndef CONFIG_STUBDOM
+-#include <hw/xen_blktap.h>
+-#endif
+-
+ uint32_t xen_domid;
+ enum xen_mode xen_mode = XEN_EMULATE;
+ 
+@@ -47,11 +43,6 @@
+     CPUState *env;
+     uint32_t domid_target;
+ 
+-#if !defined(CONFIG_STUBDOM) && !defined(__NetBSD__)
+-    /* Initialize tapdisk client */
+-    init_blktap();
+-#endif
+-
+     /* Initialize a dummy CPU */
+     if (cpu_model == NULL) {
+ #ifdef TARGET_X86_64
+Index: xen-4.2.0/qemu/xen-config-host.h
+===================================================================
+--- xen-4.2.0.orig/qemu/xen-config-host.h	2012-11-07 17:30:41.000000000 +0100
++++ xen-4.2.0/qemu/xen-config-host.h	2012-11-13 10:27:11.486012840 +0100
+@@ -18,9 +18,6 @@
+ 
+ #include "xenctrl.h"
+ #include "xenstore.h"
+-#if !defined(CONFIG_STUBDOM) && !defined(__NetBSD__)
+-#include "blktaplib.h"
+-#endif
+ 
+ #define BIOS_SIZE ((256 + 64) * 1024)
+ 
+Index: xen-4.2.0/qemu/xen-hooks.mak
+===================================================================
+--- xen-4.2.0.orig/qemu/xen-hooks.mak	2012-11-13 10:22:28.852631118 +0100
++++ xen-4.2.0/qemu/xen-hooks.mak	2012-11-13 10:25:30.369518517 +0100
+@@ -47,9 +47,6 @@
+ OBJS += xenfbfront.o
+ else
+ ifndef CONFIG_NetBSD
+-CPPFLAGS+= -I$(XEN_ROOT)/tools/blktap/lib
+-LIBS += -L$(XEN_ROOT)/tools/blktap/lib -lblktap
+-OBJS += xen_blktap.o
+ OBJS += tpm_tis.o
+ endif
+ endif

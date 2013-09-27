@@ -1,0 +1,29 @@
+From: Stefan Bader <stefan.bader@canonical.com>
+Date: Mon, 15 Jul 2013 14:29:52 +0200
+Subject: Change qemu-system-i386 paths used to point to the default one
+
+Signed-off-by: Stefan Bader <stefan.bader@canonical.com>
+
+Index: xen-4.3.0/tools/hotplug/Linux/init.d/sysconfig.xencommons
+===================================================================
+--- xen-4.3.0.orig/tools/hotplug/Linux/init.d/sysconfig.xencommons	2013-07-12 12:39:11.779727620 +0200
++++ xen-4.3.0/tools/hotplug/Linux/init.d/sysconfig.xencommons	2013-07-12 12:39:36.603848983 +0200
+@@ -14,4 +14,4 @@
+ #XENBACKENDD_DEBUG=[yes|on|1]
+ 
+ # qemu path
+-#QEMU_XEN=/usr/lib/xen/bin/qemu-system-i386
++#QEMU_XEN=/usr/bin/qemu-system-i386
+Index: xen-4.3.0/tools/libxl/libxl_dm.c
+===================================================================
+--- xen-4.3.0.orig/tools/libxl/libxl_dm.c	2013-07-12 12:39:11.803727739 +0200
++++ xen-4.3.0/tools/libxl/libxl_dm.c	2013-07-12 12:39:36.603848983 +0200
+@@ -50,7 +50,7 @@ const char *libxl__domain_device_model(l
+             dm = libxl__abs_path(gc, "qemu-dm", libxl__libexec_path());
+             break;
+         case LIBXL_DEVICE_MODEL_VERSION_QEMU_XEN:
+-            dm = libxl__abs_path(gc, "qemu-system-i386", libxl__libexec_path());
++            dm = libxl__abs_path(gc, "qemu-system-i386", "/usr/bin");
+             break;
+         default:
+             LIBXL__LOG(ctx, LIBXL__LOG_ERROR,
